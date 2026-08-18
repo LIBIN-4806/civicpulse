@@ -95,34 +95,46 @@ jobs:
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-          namespace: ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
           insecure_skip_tls_verify: true
+
+      - name: Detect and Set Active Namespace
+        run: |
+          ACTIVE_NS="${{ secrets.OPENSHIFT_NAMESPACE }}"
+          if [ -z "$ACTIVE_NS" ]; then
+            ACTIVE_NS=$(oc project -q 2>/dev/null || oc whoami --show-context 2>/dev/null | cut -d/ -f1 || echo "default")
+          fi
+          echo "CURRENT_NS=${ACTIVE_NS}" >> $GITHUB_ENV
+          echo "========================================="
+          echo "Target OpenShift Namespace: ${ACTIVE_NS}"
+          echo "========================================="
+          oc project "${ACTIVE_NS}" || true
 
       - name: Apply Core Configurations & Storage
         run: |
-          oc apply -f openshift/configmap.yaml -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }}
-          oc apply -f openshift/pvc.yaml -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }}
-          oc apply -f openshift/buildconfig.yaml -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }}
+          oc apply -f openshift/configmap.yaml -n ${{ env.CURRENT_NS }}
+          oc apply -f openshift/pvc.yaml -n ${{ env.CURRENT_NS }}
+          oc apply -f openshift/buildconfig.yaml -n ${{ env.CURRENT_NS }}
 
       - name: Build Backend Image on OpenShift
         run: |
-          oc start-build civicpulse-backend --from-dir=./backend --follow --wait -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }}
+          oc start-build civicpulse-backend --from-dir=./backend --follow --wait -n ${{ env.CURRENT_NS }}
 
       - name: Build Frontend Image on OpenShift
         run: |
-          oc start-build civicpulse-frontend --from-dir=./frontend --follow --wait -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }}
+          oc start-build civicpulse-frontend --from-dir=./frontend --follow --wait -n ${{ env.CURRENT_NS }}
 
       - name: Apply Deployments, Services & Routes
         run: |
-          oc apply -f openshift/backend-deployment.yaml -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }}
-          oc apply -f openshift/frontend-deployment.yaml -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }}
+          oc apply -f openshift/backend-deployment.yaml -n ${{ env.CURRENT_NS }}
+          oc apply -f openshift/frontend-deployment.yaml -n ${{ env.CURRENT_NS }}
 
       - name: Trigger Rollout & Wait for Health
         run: |
-          oc rollout restart deployment/civicpulse-backend -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }} || true
-          oc rollout restart deployment/civicpulse-frontend -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }} || true
-          oc rollout status deployment/civicpulse-backend -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }} --timeout=180s || true
-          oc rollout status deployment/civicpulse-frontend -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }} --timeout=180s || true
+          oc rollout restart deployment/civicpulse-backend -n ${{ env.CURRENT_NS }} || true
+          oc rollout restart deployment/civicpulse-frontend -n ${{ env.CURRENT_NS }} || true
+          oc rollout status deployment/civicpulse-backend -n ${{ env.CURRENT_NS }} --timeout=180s || true
+          oc rollout status deployment/civicpulse-frontend -n ${{ env.CURRENT_NS }} --timeout=180s || true
 
       - name: Output Live OpenShift Public Routes
         run: |
@@ -130,5 +142,5 @@ jobs:
           echo "🎉 CIVICPULSE DEPLOYMENT SUCCESSFUL!"
           echo "========================================="
           echo "Active OpenShift Routes (Public URLs):"
-          oc get routes -n ${{ secrets.OPENSHIFT_NAMESPACE || 'civicpulse' }}
+          oc get routes -n ${{ env.CURRENT_NS }}
           echo "========================================="
