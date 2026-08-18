@@ -25,8 +25,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/placeholder-owner/civicpulse-frontend:latest
-          imagePullPolicy: IfNotPresent
+          image: civicpulse-frontend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               protocol: TCP
