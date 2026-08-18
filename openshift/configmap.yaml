@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: civicpulse-config
+  labels:
+    app: civicpulse
+    app.kubernetes.io/part-of: civicpulse
+data:
+  PROJECT_NAME: "CivicPulse"
+  PROJECT_SLOGAN: "Predict Early. Act Early. Protect Communities."
+  API_V1_STR: "/api/v1"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "10080"
+  DATABASE_URL: "sqlite:////app/data/civicpulse.db"
+  CORS_ORIGINS: '["*"]'

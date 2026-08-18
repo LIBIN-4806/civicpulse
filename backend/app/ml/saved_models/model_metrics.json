@@ -1,0 +1,111 @@
+{
+  "model_name": "CivicPulse Multi-Hazard Ensemble v2.0",
+  "algorithm_classifier": "Random Forest Classifier (120 Estimators)",
+  "algorithm_regressor": "Gradient Boosting Regressor",
+  "algorithm_anomaly": "Isolation Forest (3% Contamination)",
+  "classifier_accuracy": 0.8625,
+  "regressor_r2": 0.964,
+  "regressor_rmse": 3.8,
+  "total_samples": 8000,
+  "feature_names": [
+    "rainfall_1h",
+    "rainfall_6h",
+    "rainfall_24h",
+    "elevation",
+    "river_water_level",
+    "river_danger_level",
+    "soil_moisture",
+    "temperature",
+    "humidity",
+    "wind_speed",
+    "wind_gust",
+    "atmospheric_pressure",
+    "historical_vulnerability",
+    "population_density"
+  ],
+  "feature_importances": {
+    "rainfall_24h": 0.305,
+    "river_water_level": 0.1709,
+    "rainfall_6h": 0.1459,
+    "soil_moisture": 0.1124,
+    "rainfall_1h": 0.0625,
+    "river_danger_level": 0.0375,
+    "historical_vulnerability": 0.031,
+    "temperature": 0.0256,
+    "elevation": 0.0239,
+    "wind_gust": 0.0173,
+    "atmospheric_pressure": 0.0173,
+    "population_density": 0.0173,
+    "wind_speed": 0.017,
+    "humidity": 0.0163
+  },
+  "confusion_matrix": {
+    "labels": [
+      "CRITICAL",
+      "HIGH",
+      "MODERATE"
+    ],
+    "matrix": [
+      [
+        466,
+        56,
+        0
+      ],
+      [
+        37,
+        613,
+        60
+      ],
+      [
+        0,
+        67,
+        301
+      ]
+    ]
+  },
+  "classification_report": {
+    "CRITICAL": {
+      "precision": 0.9264413518886679,
+      "recall": 0.89272030651341,
+      "f1-score": 0.9092682926829269,
+      "support": 522.0
+    },
+    "HIGH": {
+      "precision": 0.8328804347826086,
+      "recall": 0.8633802816901408,
+      "f1-score": 0.8478561549100968,
+      "support": 710.0
+    },
+    "MODERATE": {
+      "precision": 0.8337950138504155,
+      "recall": 0.8179347826086957,
+      "f1-score": 0.8257887517146777,
+      "support": 368.0
+    },
+    "accuracy": 0.8625,
+    "macro avg": {
+      "precision": 0.8643722668405639,
+      "recall": 0.8580117902707488,
+      "f1-score": 0.8609710664359005,
+      "support": 1600.0
+    },
+    "weighted avg": {
+      "precision": 0.863615037174056,
+      "recall": 0.8625,
+      "f1-score": 0.8628163621235362,
+      "support": 1600.0
+    }
+  },
+  "hazard_breakdown": {
+    "FLOOD": 6763,
+    "LANDSLIDE": 962,
+    "HEATWAVE": 197,
+    "CYCLONE": 63,
+    "WILDFIRE": 15
+  },
+  "category_breakdown": {
+    "HIGH": 3553,
+    "CRITICAL": 2608,
+    "MODERATE": 1839
+  }
+}

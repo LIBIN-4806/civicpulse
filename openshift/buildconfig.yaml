@@ -1,0 +1,57 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: civicpulse-backend
+  labels:
+    app: civicpulse
+    app.kubernetes.io/part-of: civicpulse
+    app.kubernetes.io/component: backend
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: civicpulse-frontend
+  labels:
+    app: civicpulse
+    app.kubernetes.io/part-of: civicpulse
+    app.kubernetes.io/component: frontend
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: civicpulse-backend
+  labels:
+    app: civicpulse
+    app.kubernetes.io/part-of: civicpulse
+    app.kubernetes.io/component: backend
+spec:
+  source:
+    type: Binary
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: civicpulse-backend:latest
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: civicpulse-frontend
+  labels:
+    app: civicpulse
+    app.kubernetes.io/part-of: civicpulse
+    app.kubernetes.io/component: frontend
+spec:
+  source:
+    type: Binary
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: civicpulse-frontend:latest

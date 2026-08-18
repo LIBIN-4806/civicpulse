@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: civicpulse-data-pvc
+  labels:
+    app: civicpulse
+    app.kubernetes.io/part-of: civicpulse
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

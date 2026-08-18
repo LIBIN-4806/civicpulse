@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: civicpulse-backend
+  labels:
+    app: civicpulse-backend
+    app.kubernetes.io/part-of: civicpulse
+    app.kubernetes.io/component: backend
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: civicpulse-backend
+  template:
+    metadata:
+      labels:
+        app: civicpulse-backend
+        app.kubernetes.io/part-of: civicpulse
+        app.kubernetes.io/component: backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/placeholder-owner/civicpulse-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+              name: http
+          envFrom:
+            - configMapRef:
+                name: civicpulse-config
+            - secretRef:
+                name: civicpulse-secret
+                optional: true
+          env:
+            - name: DATABASE_URL
+              value: "sqlite:////app/data/civicpulse.db"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 2
+          volumeMounts:
+            - name: data-volume
+              mountPath: /app/data
+              subPath: sqlite-db
+            - name: data-volume
+              mountPath: /app/static/uploads
+              subPath: uploads
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: civicpulse-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: civicpulse-backend
+  labels:
+    app: civicpulse-backend
+    app.kubernetes.io/part-of: civicpulse
+    app.kubernetes.io/component: backend
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    app: civicpulse-backend
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: civicpulse-backend
+  labels:
+    app: civicpulse-backend
+    app.kubernetes.io/part-of: civicpulse
+    app.kubernetes.io/component: backend
+spec:
+  to:
+    kind: Service
+    name: civicpulse-backend
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

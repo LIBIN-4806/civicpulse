@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: civicpulse-frontend
+  labels:
+    app: civicpulse-frontend
+    app.kubernetes.io/part-of: civicpulse
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: civicpulse-frontend
+  template:
+    metadata:
+      labels:
+        app: civicpulse-frontend
+        app.kubernetes.io/part-of: civicpulse
+        app.kubernetes.io/component: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/placeholder-owner/civicpulse-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: civicpulse-frontend
+  labels:
+    app: civicpulse-frontend
+    app.kubernetes.io/part-of: civicpulse
+    app.kubernetes.io/component: frontend
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: civicpulse-frontend
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: civicpulse-frontend
+  labels:
+    app: civicpulse-frontend
+    app.kubernetes.io/part-of: civicpulse
+    app.kubernetes.io/component: frontend
+spec:
+  to:
+    kind: Service
+    name: civicpulse-frontend
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

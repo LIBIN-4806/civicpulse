@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - configmap.yaml
+  - pvc.yaml
+  - backend-deployment.yaml
+  - frontend-deployment.yaml
+
+# Dynamic image tags will be updated by GitHub Actions during deployment
+images:
+  - name: ghcr.io/placeholder-owner/civicpulse-backend
+    newName: ghcr.io/placeholder-owner/civicpulse-backend
+    newTag: latest
+  - name: ghcr.io/placeholder-owner/civicpulse-frontend
+    newName: ghcr.io/placeholder-owner/civicpulse-frontend
+    newTag: latest
