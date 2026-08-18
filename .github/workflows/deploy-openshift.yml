@@ -60,10 +60,10 @@ jobs:
         run: |
           python -m pytest backend/tests -v -p no:cacheprovider
 
-      - name: Set up Node.js 20
+      - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -84,6 +84,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Install OpenShift CLI (oc)
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: 'latest'
 
       - name: Authenticate to OpenShift Cluster
         uses: redhat-actions/oc-login@v1
